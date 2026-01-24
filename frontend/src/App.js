@@ -1,13 +1,22 @@
+import { useState } from "react";
+import Navbar from "./components/Navbar";
+import Dashboard from "./pages/Dashboard";
 import PhishingLab from "./pages/PhishingLab";
+import PasswordLab from "./pages/PasswordLab";
 
 function App() {
-  return (
-    <div>
-      <h1>Welcome to Nexora Cyber Lab</h1>
-      <p>Interactive AI-guided labs coming soon!</p>
+  const [page, setPage] = useState("dashboard");
 
-      {/* Phishing Lab module */}
-      <PhishingLab />
+  let content;
+  if (page === "dashboard") content = <Dashboard />;
+  if (page === "phishing") content = <PhishingLab />;
+  if (page === "password") content = <PasswordLab />;
+
+  return (
+    <div style={{ padding: "20px", fontFamily: "Arial" }}>
+      <h1>Welcome to Nexora Cyber Lab</h1>
+      <Navbar setPage={setPage} />
+      {content}
     </div>
   );
 }
