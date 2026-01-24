@@ -1,14 +1,17 @@
-function Dashboard() {
+function Dashboard({ progress }) {
+  const labs = ["phishing", "password", "soc", "object"];
   return (
     <div>
       <h2>User Dashboard</h2>
       <ul>
-        <li>Phishing Lab: Completed</li>
-        <li>Password Lab: Completed</li>
-        <li>SOC Lab: Not started</li>
-        <li>Object Detection Lab: Not started</li>
+        {labs.map((lab) => (
+          <li key={lab}>
+            {lab.charAt(0).toUpperCase() + lab.slice(1)} Lab:{" "}
+            {progress.includes(lab) ? "Completed ✅" : "Not started ❌"}
+          </li>
+        ))}
       </ul>
-      <p>Progress tracking coming soon!</p>
+      <p>Progress updates dynamically as labs are completed.</p>
     </div>
   );
 }

@@ -1,32 +1,33 @@
 import { useEffect, useState } from "react";
 
-function SocLab() {
+function SocLab({ user, setProgress }) {
   const [alerts, setAlerts] = useState([]);
 
   useEffect(() => {
     fetch("http://127.0.0.1:8000/lab/soc")
-      .then((res) => res.json())
-      .then((data) => setAlerts(data))
-      .catch((err) => console.error(err));
+      .then(res => res.json())
+      .then(data => setAlerts(data));
   }, []);
 
-  const handleInvestigate = (id) => {
-    alert(`Alert ${id} marked as investigated ✅`);
+  const handleInvestigate = () => {
+    fetch("http://127.0.0.1:8000/progress/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: user, lab_id: "soc" }),
+    }).then(() =>
+      setProgress(prev => [...new Set([...prev, "soc"])])
+    );
   };
-
-  if (!alerts.length) return <p>Loading...</p>;
 
   return (
     <div>
       <h2>SOC / Intrusion Detection Lab</h2>
-      {alerts.map((alert) => (
-        <div key={alert.id} style={{ marginBottom: "10px" }}>
-          <p>
-            <strong>{alert.alert}</strong> - Severity: {alert.severity}
-          </p>
-          <button onClick={() => handleInvestigate(alert.id)}>Investigate</button>
+      {alerts.map(alert => (
+        <div key={alert.id}>
+          <p><strong>{alert.alert}</strong> — {alert.severity}</p>
         </div>
       ))}
+      <button onClick={handleInvestigate}>Mark as Investigated</button>
     </div>
   );
 }

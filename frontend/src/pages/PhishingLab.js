@@ -1,19 +1,26 @@
 import { useEffect, useState } from "react";
 
-function PhishingLab() {
+function PhishingLab({ user, setProgress }) {
   const [question, setQuestion] = useState(null);
   const [result, setResult] = useState("");
 
   useEffect(() => {
     fetch("http://127.0.0.1:8000/lab/phishing")
       .then(res => res.json())
-      .then(data => setQuestion(data))
-      .catch(err => console.error(err));
+      .then(data => setQuestion(data));
   }, []);
 
   const handleAnswer = (option) => {
     if (option === question.answer) {
       setResult("Correct! ✅");
+
+      fetch("http://127.0.0.1:8000/progress/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: user, lab_id: "phishing" }),
+      }).then(() =>
+        setProgress(prev => [...new Set([...prev, "phishing"])])
+      );
     } else {
       setResult("Incorrect ❌");
     }
@@ -25,7 +32,7 @@ function PhishingLab() {
     <div>
       <h2>Phishing Awareness Lab</h2>
       <p>{question.email}</p>
-      {question.options.map((opt) => (
+      {question.options.map(opt => (
         <button key={opt} onClick={() => handleAnswer(opt)}>
           {opt}
         </button>
