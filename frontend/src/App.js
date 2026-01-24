@@ -3,6 +3,8 @@ import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import PhishingLab from "./pages/PhishingLab";
 import PasswordLab from "./pages/PasswordLab";
+import SocLab from "./pages/SocLab";
+import ObjectLab from "./pages/ObjectLab";
 
 function App() {
   const [page, setPage] = useState("dashboard");
@@ -11,6 +13,8 @@ function App() {
   if (page === "dashboard") content = <Dashboard />;
   if (page === "phishing") content = <PhishingLab />;
   if (page === "password") content = <PasswordLab />;
+  if (page === "soc") content = <SocLab />;
+  if (page === "object") content = <ObjectLab />;
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial" }}>

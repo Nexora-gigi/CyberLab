@@ -4,6 +4,8 @@ function Navbar({ setPage }) {
       <button onClick={() => setPage("dashboard")}>Dashboard</button>
       <button onClick={() => setPage("phishing")}>Phishing Lab</button>
       <button onClick={() => setPage("password")}>Password Lab</button>
+      <button onClick={() => setPage("soc")}>SOC Lab</button>
+      <button onClick={() => setPage("object")}>Object Lab</button>
     </nav>
   );
 }
