@@ -20,7 +20,7 @@ function SocLab({ user, setProgress }) {
   };
 
   return (
-    <div>
+    <div className="card">
       <h2>SOC / Intrusion Detection Lab</h2>
       {alerts.map(alert => (
         <div key={alert.id}>

@@ -13,7 +13,6 @@ function PhishingLab({ user, setProgress }) {
   const handleAnswer = (option) => {
     if (option === question.answer) {
       setResult("Correct! ✅");
-
       fetch("http://127.0.0.1:8000/progress/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -29,7 +28,7 @@ function PhishingLab({ user, setProgress }) {
   if (!question) return <p>Loading...</p>;
 
   return (
-    <div>
+    <div className="card">
       <h2>Phishing Awareness Lab</h2>
       <p>{question.email}</p>
       {question.options.map(opt => (

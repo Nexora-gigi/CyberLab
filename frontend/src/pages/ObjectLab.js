@@ -20,7 +20,7 @@ function ObjectLab({ user, setProgress }) {
   };
 
   return (
-    <div>
+    <div className="card">
       <h2>Object Detection Lab</h2>
       {objects.map(obj => (
         <div key={obj.id}>
