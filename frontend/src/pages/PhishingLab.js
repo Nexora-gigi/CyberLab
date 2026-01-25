@@ -1,42 +1,49 @@
 import { useEffect, useState } from "react";
 
-function PhishingLab({ user, setProgress }) {
-  const [question, setQuestion] = useState(null);
-  const [result, setResult] = useState("");
+function PhishingLab({ user, setPage, setProgress }) {
+  const [data, setData] = useState(null);
+  const [selected, setSelected] = useState("");
 
   useEffect(() => {
     fetch("http://127.0.0.1:8000/lab/phishing")
-      .then(res => res.json())
-      .then(data => setQuestion(data));
+      .then((res) => res.json())
+      .then((d) => setData(d));
   }, []);
 
-  const handleAnswer = (option) => {
-    if (option === question.answer) {
-      setResult("Correct! ✅");
-      fetch("http://127.0.0.1:8000/progress/complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: user, lab_id: "phishing" }),
-      }).then(() =>
-        setProgress(prev => [...new Set([...prev, "phishing"])])
-      );
-    } else {
-      setResult("Incorrect ❌");
-    }
+  const handleSubmit = async () => {
+    if (selected === data.answer) alert("Correct!");
+    else alert("Incorrect!");
+
+    // Save progress
+    await fetch("http://127.0.0.1:8000/progress/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: user, lab_id: "phishing" }),
+    });
+    setProgress((prev) => [...prev, "Phishing"]);
+    setPage("dashboard");
   };
 
-  if (!question) return <p>Loading...</p>;
+  if (!data) return <p>Loading lab...</p>;
 
   return (
-    <div className="card">
-      <h2>Phishing Awareness Lab</h2>
-      <p>{question.email}</p>
-      {question.options.map(opt => (
-        <button key={opt} onClick={() => handleAnswer(opt)}>
+    <div>
+      <h2>Phishing Lab</h2>
+      <p>{data.email}</p>
+      {data.options.map((opt) => (
+        <label key={opt}>
+          <input
+            type="radio"
+            name="phish"
+            value={opt}
+            onChange={(e) => setSelected(e.target.value)}
+          />
           {opt}
-        </button>
+        </label>
       ))}
-      <p>{result}</p>
+      <br />
+      <button onClick={handleSubmit}>Submit</button>
+      <button onClick={() => setPage("dashboard")}>Back to Dashboard</button>
     </div>
   );
 }

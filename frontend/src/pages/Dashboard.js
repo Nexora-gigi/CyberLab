@@ -1,17 +1,16 @@
-function Dashboard({ progress }) {
-  const labs = ["phishing", "password", "soc", "object"];
+function Dashboard({ setPage, user, progress }) {
   return (
     <div>
-      <h2>User Dashboard</h2>
+      <h1>Welcome, {user}!</h1>
+      <p>Completed Labs: {progress.join(", ") || "None"}</p>
+
+      <h2>Select a Lab</h2>
       <ul>
-        {labs.map((lab) => (
-          <li key={lab}>
-            {lab.charAt(0).toUpperCase() + lab.slice(1)} Lab:{" "}
-            {progress.includes(lab) ? "Completed ✅" : "Not started ❌"}
-          </li>
-        ))}
+        <li><button onClick={() => setPage("phishing")}>Phishing Lab</button></li>
+        <li><button onClick={() => setPage("password")}>Password Lab</button></li>
+        <li><button onClick={() => setPage("soc")}>SOC Lab</button></li>
+        <li><button onClick={() => setPage("object")}>Object Detection Lab</button></li>
       </ul>
-      <p>Progress updates dynamically as labs are completed.</p>
     </div>
   );
 }

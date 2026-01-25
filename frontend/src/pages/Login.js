@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function Login({ setUser }) {
+function Login({ setUser, setPage }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -12,16 +12,17 @@ function Login({ setUser }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
-      if (!res.ok) throw new Error("Invalid credentials");
-      await res.json();
-      setUser(username); // set logged-in user
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail);
+      setUser(username);
+      setPage("dashboard");  // go to home/dashboard after login
     } catch (err) {
       setError(err.message);
     }
   };
 
   return (
-    <div>
+    <div className="card">
       <h2>Login</h2>
       <input
         placeholder="Username"
@@ -36,6 +37,10 @@ function Login({ setUser }) {
       />
       <button onClick={handleLogin}>Login</button>
       {error && <p style={{ color: "red" }}>{error}</p>}
+      <p>
+        Don't have an account?{" "}
+        <button onClick={() => setPage("register")}>Register</button>
+      </p>
     </div>
   );
 }

@@ -1,21 +1,66 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from auth import create_access_token
-from database import cursor, conn
+from fastapi import FastAPI, HTTPException, APIRouter
+from pydantic import BaseModel, EmailStr, validator
+from typing import Optional
+from jose import jwt
+import sqlite3
+from datetime import datetime, timedelta
+import re
 
+app = FastAPI()
 router = APIRouter()
 
-# --------------------
-# Mock users (can replace with real DB later)
-# --------------------
-users = {
-    "admin": "admin123",
-    "student": "password"
-}
+# JWT setup
+SECRET_KEY = "nexora-secret"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-# --------------------
-# Pydantic models
-# --------------------
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+# --- DB setup ---
+conn = sqlite3.connect("nexora.db", check_same_thread=False)
+cursor = conn.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    username TEXT PRIMARY KEY,
+    full_name TEXT,
+    email TEXT UNIQUE,
+    password TEXT
+)
+""")
+conn.commit()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS progress (
+    username TEXT,
+    lab TEXT
+)
+""")
+conn.commit()
+
+# --- Pydantic models ---
+class RegisterData(BaseModel):
+    username: str
+    full_name: str
+    email: EmailStr
+    password: str
+
+    @validator("username")
+    def username_valid(cls, v):
+        if not re.match("^[A-Za-z0-9_]{3,20}$", v):
+            raise ValueError("Username must be 3-20 chars, letters/numbers/_ only")
+        return v
+
+    @validator("password")
+    def password_valid(cls, v):
+        if len(v) < 6:
+            raise ValueError("Password must be at least 6 characters")
+        return v
+
 class LoginData(BaseModel):
     username: str
     password: str
@@ -24,81 +69,50 @@ class LabCompleteData(BaseModel):
     username: str
     lab_id: str
 
-class PasswordCheck(BaseModel):
-    password: str
+# --- Register endpoint ---
+@router.post("/register")
+def register(data: RegisterData):
+    # check if username exists
+    cursor.execute("SELECT username FROM users WHERE username=?", (data.username,))
+    if cursor.fetchone():
+        raise HTTPException(status_code=400, detail="Username already exists")
+    # check if email exists
+    cursor.execute("SELECT email FROM users WHERE email=?", (data.email,))
+    if cursor.fetchone():
+        raise HTTPException(status_code=400, detail="Email already registered")
 
-# --------------------
-# LOGIN ROUTE
-# --------------------
+    # Insert into DB
+    cursor.execute(
+        "INSERT INTO users (username, full_name, email, password) VALUES (?, ?, ?, ?)",
+        (data.username, data.full_name, data.email, data.password)
+    )
+    conn.commit()
+    return {"message": "Registration complete"}
+
+# --- Login endpoint ---
 @router.post("/login")
 def login(data: LoginData):
-    if data.username in users and users[data.username] == data.password:
+    cursor.execute(
+        "SELECT password FROM users WHERE username=?", (data.username,)
+    )
+    row = cursor.fetchone()
+    if row and row[0] == data.password:
         token = create_access_token({"sub": data.username})
         return {"access_token": token, "token_type": "bearer"}
     raise HTTPException(status_code=401, detail="Invalid credentials")
 
-# --------------------
-# LAB 1: Phishing Lab
-# --------------------
-@router.get("/lab/phishing")
-def phishing_lab():
-    return {
-        "question": "Is this email safe?",
-        "email": "Your account has been compromised. Click here now!"
-    }
-
-# --------------------
-# LAB 2: Password Strength Lab
-# --------------------
-def evaluate_password(password: str):
-    score = 0
-    if len(password) >= 8:
-        score += 1
-    if any(c.isdigit() for c in password):
-        score += 1
-    if any(c.isupper() for c in password):
-        score += 1
-    if any(c in "!@#$%^&*" for c in password):
-        score += 1
-
-    if score <= 1:
-        return "Weak"
-    elif score == 2:
-        return "Medium"
-    return "Strong"
-
-@router.post("/lab/password/check")
-def check_password(data: PasswordCheck):
-    strength = evaluate_password(data.password)
-    return {"strength": strength}
-
-# --------------------
-# LAB 3: Object Detection Lab (mock)
-# --------------------
-@router.post("/lab/object/detect")
-def detect_object():
-    return {"objects": ["Person", "Laptop", "Phone"]}
-
-# --------------------
-# LAB 4: Save User Progress
-# --------------------
+# --- Progress endpoints ---
 @router.post("/progress/complete")
 def complete_lab(data: LabCompleteData):
-    cursor.execute(
-        "INSERT INTO progress (username, lab) VALUES (?, ?)",
-        (data.username, data.lab_id)
-    )
+    cursor.execute("INSERT INTO progress VALUES (?, ?)", (data.username, data.lab_id))
     conn.commit()
-    return {"message": "Lab progress saved"}
+    return {"message": "Saved"}
 
-# --------------------
-# GET USER PROGRESS
-# --------------------
 @router.get("/progress/{username}")
 def get_progress(username: str):
-    cursor.execute(
-        "SELECT lab FROM progress WHERE username = ?",
-        (username,)
-    )
-    labs = cursor.fetchall()
-    return {"completed_labs": [lab[0] for lab in labs]}
+    cursor.execute("SELECT lab FROM progress WHERE username=?", (username,))
+    rows = cursor.fetchall()
+    return {"completed_labs": [row[0] for row in rows]}
+
+# --- Include router ---
+app.include_router(router)
