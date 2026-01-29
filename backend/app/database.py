@@ -1,14 +1,13 @@
-# backend/app/database.py
-import sqlite3
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-conn = sqlite3.connect("cyberlab.db", check_same_thread=False)
-cursor = conn.cursor()
+DATABASE_URL = "sqlite:///./cyberlab.db"
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS progress (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT,
-    lab TEXT
+engine = create_engine(
+    DATABASE_URL, connect_args={"check_same_thread": False}
 )
-""")
-conn.commit()
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base = declarative_base()

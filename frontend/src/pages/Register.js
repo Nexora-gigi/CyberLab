@@ -1,26 +1,30 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-function Register({ setUser, setPage }) {
-  const [username, setUsername] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+function Register() {
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    username: "",
+    full_name: "",
+    email: "",
+    password: "",
+  });
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-  const handleRegister = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setError("");
     setSuccess("");
 
-    if (!username || !fullName || !email || !password) {
+    if (!form.username || !form.full_name || !form.email || !form.password) {
       setError("All fields are required");
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email");
       return;
     }
 
@@ -28,30 +32,41 @@ function Register({ setUser, setPage }) {
       const res = await fetch("http://127.0.0.1:8000/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, full_name: fullName, email, password }),
+        body: JSON.stringify(form),
       });
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail);
-      setSuccess(data.message);
-      setUser(username);
-      setPage("dashboard"); // go to home/dashboard
-    } catch (err) {
-      setError(err.message);
+
+      if (!res.ok) {
+        setError(data.detail || "Registration failed");
+        return;
+      }
+
+      setSuccess("Registration successful! Redirecting to login...");
+      setTimeout(() => navigate("/login"), 1500);
+    } catch {
+      setError("Backend not reachable");
     }
   };
 
   return (
-    <div className="card">
-      <h2>Register</h2>
-      <input placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
-      <input placeholder="Full Name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
-      <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-      <button onClick={handleRegister}>Register</button>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {success && <p style={{ color: "green" }}>{success}</p>}
-      <p>
-        Already have an account? <button onClick={() => setPage("login")}>Login</button>
+    <div className="auth-container">
+      <h2>Create Account</h2>
+
+      {error && <p className="error">{error}</p>}
+      {success && <p className="success">{success}</p>}
+
+      <form onSubmit={handleSubmit}>
+        <input name="username" placeholder="Username" onChange={handleChange} />
+        <input name="full_name" placeholder="Full Name" onChange={handleChange} />
+        <input name="email" type="email" placeholder="Email" onChange={handleChange} />
+        <input name="password" type="password" placeholder="Password" onChange={handleChange} />
+
+        <button type="submit">Register</button>
+      </form>
+
+      <p onClick={() => navigate("/login")} className="link">
+        Already have an account? Login
       </p>
     </div>
   );

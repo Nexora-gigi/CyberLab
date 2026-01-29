@@ -1,45 +1,32 @@
-import { useState } from "react";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import PhishingLab from "./pages/PhishingLab";
-import PasswordLab from "./pages/PasswordLab";
-import SocLab from "./pages/SocLab";
-import ObjectLab from "./pages/ObjectLab";
+
+import PasswordLab from "./pages/Labs/PasswordLab";
+import PhishingLab from "./pages/Labs/PhishingLab";
+import SOCLab from "./pages/Labs/SocLab";
+import ObjectDetectionLab from "./pages/Labs/ObjectDetectionLab";
+
+import "./App.css";
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [page, setPage] = useState("login");
-  const [progress, setProgress] = useState([]);
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
 
-  let content;
-  switch (page) {
-    case "login":
-      content = <Login setUser={setUser} setPage={setPage} />;
-      break;
-    case "register":
-      content = <Register setUser={setUser} setPage={setPage} />;
-      break;
-    case "dashboard":
-      content = <Dashboard setPage={setPage} user={user} progress={progress} setProgress={setProgress} />;
-      break;
-    case "phishing":
-      content = <PhishingLab user={user} setPage={setPage} setProgress={setProgress} />;
-      break;
-    case "password":
-      content = <PasswordLab user={user} setPage={setPage} setProgress={setProgress} />;
-      break;
-    case "soc":
-      content = <SocLab user={user} setPage={setPage} setProgress={setProgress} />;
-      break;
-    case "object":
-      content = <ObjectLab user={user} setPage={setPage} setProgress={setProgress} />;
-      break;
-    default:
-      content = <Login setUser={setUser} setPage={setPage} />;
-  }
-
-  return <div className="container">{content}</div>;
+        <Route path="/labs/password" element={<PasswordLab />} />
+        <Route path="/labs/phishing" element={<PhishingLab />} />
+        <Route path="/labs/soc" element={<SOCLab />} />
+        <Route path="/labs/object" element={<ObjectDetectionLab />} />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;

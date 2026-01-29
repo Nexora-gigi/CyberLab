@@ -1,12 +1,10 @@
-from fastapi import FastAPI, HTTPException, APIRouter
+from fastapi import HTTPException, APIRouter
 from pydantic import BaseModel, EmailStr, validator
-from typing import Optional
 from jose import jwt
 import sqlite3
 from datetime import datetime, timedelta
 import re
 
-app = FastAPI()
 router = APIRouter()
 
 # JWT setup
@@ -14,11 +12,13 @@ SECRET_KEY = "nexora-secret"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
+
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
 
 # --- DB setup ---
 conn = sqlite3.connect("nexora.db", check_same_thread=False)
@@ -32,7 +32,6 @@ CREATE TABLE IF NOT EXISTS users (
     password TEXT
 )
 """)
-conn.commit()
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS progress (
@@ -40,7 +39,9 @@ CREATE TABLE IF NOT EXISTS progress (
     lab TEXT
 )
 """)
+
 conn.commit()
+
 
 # --- Pydantic models ---
 class RegisterData(BaseModel):
@@ -52,7 +53,7 @@ class RegisterData(BaseModel):
     @validator("username")
     def username_valid(cls, v):
         if not re.match("^[A-Za-z0-9_]{3,20}$", v):
-            raise ValueError("Username must be 3-20 chars, letters/numbers/_ only")
+            raise ValueError("Username must be 3–20 chars, letters/numbers/_ only")
         return v
 
     @validator("password")
@@ -61,58 +62,63 @@ class RegisterData(BaseModel):
             raise ValueError("Password must be at least 6 characters")
         return v
 
+
 class LoginData(BaseModel):
     username: str
     password: str
+
 
 class LabCompleteData(BaseModel):
     username: str
     lab_id: str
 
-# --- Register endpoint ---
+
+# --- Register ---
 @router.post("/register")
 def register(data: RegisterData):
-    # check if username exists
     cursor.execute("SELECT username FROM users WHERE username=?", (data.username,))
     if cursor.fetchone():
         raise HTTPException(status_code=400, detail="Username already exists")
-    # check if email exists
+
     cursor.execute("SELECT email FROM users WHERE email=?", (data.email,))
     if cursor.fetchone():
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # Insert into DB
     cursor.execute(
         "INSERT INTO users (username, full_name, email, password) VALUES (?, ?, ?, ?)",
-        (data.username, data.full_name, data.email, data.password)
+        (data.username, data.full_name, data.email, data.password),
     )
     conn.commit()
+
     return {"message": "Registration complete"}
 
-# --- Login endpoint ---
+
+# --- Login ---
 @router.post("/login")
 def login(data: LoginData):
-    cursor.execute(
-        "SELECT password FROM users WHERE username=?", (data.username,)
-    )
+    cursor.execute("SELECT password FROM users WHERE username=?", (data.username,))
     row = cursor.fetchone()
-    if row and row[0] == data.password:
-        token = create_access_token({"sub": data.username})
-        return {"access_token": token, "token_type": "bearer"}
-    raise HTTPException(status_code=401, detail="Invalid credentials")
 
-# --- Progress endpoints ---
+    if not row or row[0] != data.password:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    token = create_access_token({"sub": data.username})
+    return {"access_token": token, "token_type": "bearer"}
+
+
+# --- Progress ---
 @router.post("/progress/complete")
 def complete_lab(data: LabCompleteData):
-    cursor.execute("INSERT INTO progress VALUES (?, ?)", (data.username, data.lab_id))
+    cursor.execute(
+        "INSERT INTO progress (username, lab) VALUES (?, ?)",
+        (data.username, data.lab_id),
+    )
     conn.commit()
-    return {"message": "Saved"}
+    return {"message": "Progress saved"}
+
 
 @router.get("/progress/{username}")
 def get_progress(username: str):
     cursor.execute("SELECT lab FROM progress WHERE username=?", (username,))
     rows = cursor.fetchall()
     return {"completed_labs": [row[0] for row in rows]}
-
-# --- Include router ---
-app.include_router(router)

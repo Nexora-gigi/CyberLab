@@ -1,21 +1,26 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import router
+from auth import router as auth_router
+from database import Base, engine
 
-app = FastAPI(
-    title="Nexora CyberLab",
-    description="AI-powered cybersecurity training platform",
-    version="0.1.0"
-)
+app = FastAPI()
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+]
 
-# Allow frontend (React) to talk to backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Register all API routes
-app.include_router(router)
+Base.metadata.create_all(bind=engine)
+
+app.include_router(auth_router)
+
+@app.get("/")
+def root():
+    return {"message": "CyberLab backend running"}
