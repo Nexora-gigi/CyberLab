@@ -122,3 +122,7 @@ def get_progress(username: str):
     cursor.execute("SELECT lab FROM progress WHERE username=?", (username,))
     rows = cursor.fetchall()
     return {"completed_labs": [row[0] for row in rows]}
+
+
+def progress():
+    return None

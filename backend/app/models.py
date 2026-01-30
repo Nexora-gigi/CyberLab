@@ -9,3 +9,11 @@ class User(Base):
     full_name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
+
+class Progress(Base):
+    __tablename__ = "progress"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, index=True)
+    lab_id = Column(String)
+    progress = Column(Integer)

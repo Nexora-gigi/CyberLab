@@ -1,57 +1,66 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "../App.css";
 
 function Login() {
   const navigate = useNavigate();
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
-    setError("");
 
+    // Basic validation
     if (!username || !password) {
       setError("Please fill all fields");
       return;
     }
 
-    try {
-      const res = await fetch("http://127.0.0.1:8000/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
+    // Check credentials in localStorage (demo purpose)
+    const users = JSON.parse(localStorage.getItem("users") || "[]");
+    const user = users.find(u => u.username === username && u.password === password);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.detail || "Login failed");
-        return;
-      }
-
+    if (user) {
+      localStorage.setItem("currentUser", JSON.stringify(user));
       navigate("/dashboard");
-    } catch {
-      setError("Backend not reachable");
+    } else {
+      setError("Invalid username or password");
     }
   };
 
   return (
     <div className="auth-container">
-      <h2>Login</h2>
+      <div className="auth-card">
+        <h2>Login</h2>
+        <form onSubmit={handleLogin}>
+          <label>Username</label>
+          <input
+            type="text"
+            placeholder="Enter your username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
 
-      {error && <p className="error">{error}</p>}
+          <label>Password</label>
+          <input
+            type="password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-      <form onSubmit={handleLogin}>
-        <input placeholder="Username" onChange={(e) => setUsername(e.target.value)} />
-        <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
-        <button type="submit">Login</button>
-      </form>
+          {error && <p className="feedback incorrect">{error}</p>}
 
-      <p onClick={() => navigate("/register")} className="link">
-        Create an account
-      </p>
+          <button type="submit">Login</button>
+        </form>
+        <p
+          className="switch-auth"
+          onClick={() => navigate("/register")}
+        >
+          Don't have an account? Create one
+        </p>
+      </div>
     </div>
   );
 }

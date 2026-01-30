@@ -1,119 +1,266 @@
+/* ---------- Global ---------- */
 body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  color: white;
+  margin: 0;
+  padding: 0;
+  background-color: #0d1117;
+  color: #f5f5f5;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.auth-container {
-  width: 320px;
-  margin: 120px auto;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 25px;
-  border-radius: 10px;
+.App {
   text-align: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0d1117, #1b1f2a);
 }
 
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border-radius: 5px;
-  border: none;
+/* ---------- Logo Animation ---------- */
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
 }
 
-button {
-  width: 100%;
-  padding: 10px;
-  background: #00c6ff;
-  border: none;
-  border-radius: 5px;
-  font-weight: bold;
-  cursor: pointer;
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
 }
 
-button:hover {
-  background: #0072ff;
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-.error {
-  color: #ff6b6b;
+/* ---------- Links ---------- */
+.App-link {
+  color: #4fc3f7;
 }
 
-.success {
-  color: #4cd137;
+/* ---------- Dashboard ---------- */
+.dashboard-container {
+  padding: 20px;
 }
 
-.link {
-  margin-top: 10px;
-  cursor: pointer;
-  color: #00c6ff;
-}
-
-.home {
-  text-align: center;
-  margin-top: 150px;
-}
-
-/* Lab pages */
-.lab-page {
-  max-width: 700px;
-  margin: 50px auto;
-  background-color: rgba(30, 35, 75, 0.9);
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
-  text-align: center;
-}
-
-.lab-page ul {
-  text-align: left;
-  margin: 20px auto;
-  padding-left: 20px;
-}
-
-.lab-page button {
-  margin-top: 20px;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #4cafeb;
-  color: white;
-  border: none;
-}
-
-.lab-page button:hover {
-  background: #0072ff;
-}
-
-/* Dashboard cards grid */
-.lab-grid {
+.dashboard-header {
   display: flex;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.labs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
-  justify-content: center;
-  margin-top: 30px;
 }
 
 .lab-card {
-  background-color: rgba(0, 0, 0, 0.6);
+  background: linear-gradient(135deg, #1b1f2a, #2a2f42);
+  color: #ffffff;
   padding: 20px;
-  width: 200px;
-  border-radius: 10px;
+  border-radius: 12px;
   text-align: center;
-  cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.3s;
 }
-
 .lab-card:hover {
-  transform: translateY(-5px);
-  background-color: rgba(0, 78, 255, 0.6);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
 }
 
-.lab-card h3 {
+.lab-card img {
+  width: 50px;
+  margin-bottom: 10px;
+}
+
+/* ---------- Progress Bars ---------- */
+.progress-bar-container {
+  width: 100%;
+  background: #333;
+  border-radius: 6px;
+  height: 12px;
   margin: 10px 0;
 }
 
-.lab-card p {
-  font-size: 0.9rem;
-  color: #ccc;
+.progress-bar {
+  height: 12px;
+  background: linear-gradient(90deg, #4fc3f7, #2979ff);
+  border-radius: 6px;
+  transition: width 0.5s ease-in-out;
+}
+
+/* ---------- Buttons ---------- */
+.start-btn, .submit-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #4fc3f7, #2979ff);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 10px;
+  transition: transform 0.2s, background 0.3s;
+}
+.start-btn:hover, .submit-btn:hover {
+  transform: scale(1.05);
+  background: linear-gradient(90deg, #2979ff, #4fc3f7);
+}
+
+/* ---------- Lab Quiz ---------- */
+.quiz-container {
+  margin-top: 20px;
+}
+
+.quiz-question {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #1b1f2a;
+  border-radius: 10px;
+}
+
+.option-label {
+  display: block;
+  margin: 6px 0;
+  cursor: pointer;
+}
+
+input[type="text"] {
+  padding: 6px;
+  border-radius: 6px;
+  border: none;
+  width: 100%;
+  margin-top: 6px;
+  background-color: #2a2f42;
+  color: #f5f5f5;
+}
+
+.feedback {
+  margin-top: 6px;
+  font-weight: bold;
+}
+
+.correct {
+  color: #00e676;
+}
+
+.incorrect {
+  color: #ff5252;
+}
+
+.score-display {
+  margin-top: 20px;
+  font-size: 18px;
+}
+
+/* ---------- AI Helper ---------- */
+.ai-helper {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: linear-gradient(135deg, #2979ff, #4fc3f7);
+  color: white;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 28px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  transition: transform 0.2s;
+}
+.ai-helper:hover {
+  transform: scale(1.1);
+}
+
+/* ---------- Toast Notifications ---------- */
+.Toastify__toast--success {
+  background: #4fc3f7;
+}
+.Toastify__toast--error {
+  background: #ff5252;
+}
+
+/* ---------- Login / Register ---------- */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0d1117, #1b1f2a);
+  padding: 20px;
+}
+
+.auth-card {
+  background-color: #1b1f2a;
+  padding: 40px 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  width: 100%;
+  max-width: 400px;
+  color: #f5f5f5;
+  text-align: center;
+}
+
+.auth-card h2 {
+  margin-bottom: 25px;
+  color: #4fc3f7;
+}
+
+.auth-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.auth-card input[type="text"],
+.auth-card input[type="email"],
+.auth-card input[type="password"] {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background-color: #2a2f42;
+  color: #f5f5f5;
+  font-size: 14px;
+}
+
+.auth-card input::placeholder {
+  color: #bbb;
+}
+
+.auth-card button {
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(90deg, #2979ff, #4fc3f7);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
+}
+
+.auth-card button:hover {
+  transform: scale(1.05);
+  background: linear-gradient(90deg, #4fc3f7, #2979ff);
+}
+
+.auth-card .switch-auth {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.auth-card .switch-auth:hover {
+  color: #4fc3f7;
+}
+
+/* ---------- Mobile adjustments ---------- */
+@media (max-width: 768px) {
+  .labs-grid {
+    grid-template-columns: 1fr;
+  }
+  .auth-card {
+    padding: 30px 20px;
+  }
 }

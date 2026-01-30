@@ -1,73 +1,100 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "../App.css";
 
 function Register() {
   const navigate = useNavigate();
-
-  const [form, setForm] = useState({
-    username: "",
-    full_name: "",
-    email: "",
-    password: "",
-  });
-
+  const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleRegister = (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
 
-    if (!form.username || !form.full_name || !form.email || !form.password) {
-      setError("All fields are required");
+    // Basic validation
+    if (!username || !fullName || !email || !password) {
+      setError("Please fill all fields");
       return;
     }
 
-    try {
-      const res = await fetch("http://127.0.0.1:8000/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.detail || "Registration failed");
-        return;
-      }
-
-      setSuccess("Registration successful! Redirecting to login...");
-      setTimeout(() => navigate("/login"), 1500);
-    } catch {
-      setError("Backend not reachable");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email");
+      return;
     }
+
+    const users = JSON.parse(localStorage.getItem("users") || "[]");
+    if (users.find(u => u.username === username)) {
+      setError("Username already exists");
+      return;
+    }
+
+    const newUser = { username, fullName, email, password };
+    users.push(newUser);
+    localStorage.setItem("users", JSON.stringify(users));
+
+    setSuccess("Registration complete! You can now login.");
+    setError("");
+    setUsername("");
+    setFullName("");
+    setEmail("");
+    setPassword("");
+
+    setTimeout(() => navigate("/login"), 2000);
   };
 
   return (
     <div className="auth-container">
-      <h2>Create Account</h2>
+      <div className="auth-card">
+        <h2>Create Account</h2>
+        <form onSubmit={handleRegister}>
+          <label>Username</label>
+          <input
+            type="text"
+            placeholder="Enter your username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
 
-      {error && <p className="error">{error}</p>}
-      {success && <p className="success">{success}</p>}
+          <label>Full Name</label>
+          <input
+            type="text"
+            placeholder="Enter your full name"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+          />
 
-      <form onSubmit={handleSubmit}>
-        <input name="username" placeholder="Username" onChange={handleChange} />
-        <input name="full_name" placeholder="Full Name" onChange={handleChange} />
-        <input name="email" type="email" placeholder="Email" onChange={handleChange} />
-        <input name="password" type="password" placeholder="Password" onChange={handleChange} />
+          <label>Email</label>
+          <input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-        <button type="submit">Register</button>
-      </form>
+          <label>Password</label>
+          <input
+            type="password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-      <p onClick={() => navigate("/login")} className="link">
-        Already have an account? Login
-      </p>
+          {error && <p className="feedback incorrect">{error}</p>}
+          {success && <p className="feedback correct">{success}</p>}
+
+          <button type="submit">Register</button>
+        </form>
+        <p
+          className="switch-auth"
+          onClick={() => navigate("/login")}
+        >
+          Already have an account? Login
+        </p>
+      </div>
     </div>
   );
 }
